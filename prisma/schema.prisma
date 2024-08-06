@@ -1,0 +1,328 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+
+model SentMail{
+	mailId String @id() @default(uuid()) @db.VarChar(255)
+	type String @db.VarChar(255)
+	value String @db.VarChar(255)
+	isSent Boolean @default(false)
+	sentDate DateTime @default(now())
+
+	Email Email @relation(fields: [emailId],references: [emailId])
+	emailId String  @db.VarChar(255)
+}
+
+model Email{
+	emailId String @id() @db.VarChar(255)
+	email String @db.VarChar(255)
+	isVerified Boolean @default(false)
+	createdDate DateTime @default(now())
+
+	SentMail SentMail[]
+	User User?
+}
+
+model SentSMS {
+	smsId String @id() @default(uuid()) @db.VarChar(255)
+	type String @db.VarChar(255)
+	value String @db.VarChar(255)
+	sentDate DateTime @default(now())
+
+	Phone Phone @relation(fields: [phoneId],references: [phoneId])
+	phoneId String  @db.VarChar(255)
+}
+
+model Phone{
+	phoneId String @id() @default(uuid()) @db.VarChar(255)
+	phone String @db.VarChar(255)
+	isVerified Boolean @default(false)
+	createdDate DateTime @default(now())
+
+	SentSMS SentSMS[]
+	User User?
+}
+
+enum Gender {
+	Male
+	Female
+	Other
+}
+model User{
+	userId String @id() @default(uuid()) @db.VarChar(255)
+
+	Email Email @relation(fields: [emailId],references: [emailId])
+	emailId String  @db.VarChar(255) @unique
+
+	Phone Phone @relation(fields: [phoneId],references: [phoneId])
+	phoneId String  @db.VarChar(255) @unique
+
+	userPassword String @db.VarChar(255) @unique()
+
+	userDateOfBirth DateTime
+
+	userGender Gender
+
+	fullName String @db.VarChar(255) 
+
+	// describeYourself String @db.MediumText() 
+
+	userNameHash String @db.VarChar(255) @unique()
+	userName String @db.VarChar(255)
+
+	isOrganization Boolean @default(false)
+
+	// district String @db.VarChar(255)
+	longitude String @db.VarChar(255)
+	latitude String @db.VarChar(255)
+
+	posted BigInt @default(0)
+
+	createdDate DateTime @default(now())
+	modifiedDate DateTime @default(now())
+	deletedDate DateTime?
+	unlockTime DateTime?
+
+	CreatedItems Item[]
+
+	GivenRating UserRatesUser[] @relation("givenRating")
+	GottenRating UserRatesUser[] @relation("gottenRating")
+
+	GottenUserReports UserReportUser[] @relation("reportToUser")
+	GivenUserReports UserReportUser[] @relation("reportFromUser")
+
+	SentUserMessages UserMessageUser[] @relation("messageFromUser")
+	ReceivedUserMessages UserMessageUser[] @relation("messageToUser")
+
+	RequestedItems UserRequestsItem[]
+
+	ItemMessagesSent UserCommentsItem[]
+	CommentsReplied UserCommentsOnComment[]
+
+	ItemReportsSent UserReportsItem[]
+
+	GivenAdminReports UserReportAdmin[]
+
+	UserNotifications UserNotification[]
+
+}
+
+model UserRatesUser{
+	rateId String @id() @default(uuid()) @db.VarChar(255)
+	star Int @default(0) @db.Int()
+	feedback String? @db.VarChar(255)
+	ratedDate DateTime @default(now())
+	modifiedDate DateTime @default(now())
+
+	FromUser User @relation("givenRating",fields: [fromUser],references: [userId],onDelete: Cascade)
+	fromUser String @db.VarChar(255)
+
+	ToUser User @relation("gottenRating",fields: [toUser],references: [userId],onDelete: Cascade)
+	toUser String @db.VarChar(255)
+
+	@@unique([fromUser,toUser])
+}
+model UserNotification {
+	notificationId String @id() @default(uuid()) @db.VarChar(255)
+	User User @relation(fields: [userId],references: [userId])
+	userId String @db.VarChar(255)
+	description String @db.VarChar(5000)
+	createdDate DateTime @default(now())
+	seen DateTime?
+}
+
+model UserReportUser{
+	userReportId String @id() @default(uuid()) @db.VarChar(255)
+	purpose String? @db.VarChar(255)
+	description String? @db.VarChar(1000)
+	reportedDate DateTime @default(now())
+
+	From User @relation("reportFromUser",fields: [fromUser],references: [userId],onDelete: Cascade)
+	fromUser String @db.VarChar(255)
+
+	To User @relation("reportToUser",fields: [toUser],references: [userId],onDelete: Cascade)
+	toUser String @db.VarChar(255)
+}
+
+model UserMessageUser{
+	userMessageId String @id() @default(uuid()) @db.VarChar(255)
+	description String? @db.VarChar(255)
+	createdDate DateTime @default(now())
+	seen DateTime?
+
+	From User @relation("messageFromUser",fields: [fromUser],references: [userId],onDelete: Cascade)
+	fromUser String @db.VarChar(255)
+
+	To User? @relation("messageToUser",fields: [toUser],references: [userId],onDelete: Cascade)
+	toUser String? @db.VarChar(255)
+}
+
+
+model ItemMultimedia{
+	multimediaId String @id() @default(uuid()) @db.VarChar(255)
+	type String
+	extension String
+
+	Item Item @relation(fields: [itemId],references: [itemId],onDelete: Cascade)
+	itemId String @db.VarChar(255)
+}
+
+
+model Item{
+	itemId String @id() @default(uuid()) @db.VarChar(255)
+	itemName String @db.VarChar(255)
+	itemCount BigInt @db.UnsignedBigInt
+	itemAvilableCount BigInt @db.UnsignedBigInt
+	itemDescription String @db.VarChar(1000)
+
+	itemDistrict String @db.VarChar(255)
+	longitude String @db.VarChar(255)
+	latitude String @db.VarChar(255)
+	
+	createdDate DateTime @default(now())
+	modifiedDate DateTime @default(now())
+	discontinuedDate DateTime?
+	revokedDate DateTime?
+
+	category String @db.VarChar(255)
+
+	User User @relation(fields: [userId],references: [userId],onDelete: Cascade)
+	userId String @db.VarChar(255)
+
+	ItemMultimedias ItemMultimedia[]
+
+	ItemRequests UserRequestsItem[]
+
+	ItemCommentsReceived UserCommentsItem[]
+
+	ItemReportsReceived UserReportsItem[]
+
+}
+
+
+
+
+model UserRequestsItem{
+	itemRequestId String @id() @default(uuid()) @db.VarChar(255)
+	requestAmount BigInt @db.UnsignedBigInt
+	requestedDate DateTime @default(now())
+	acceptedDate DateTime?
+	rejectedDate DateTime?
+
+	Item Item @relation(fields: [itemId],references: [itemId],onDelete: Cascade)
+	itemId String @db.VarChar(255)
+
+	User User @relation(fields: [userId],references: [userId],onDelete: Cascade)
+	userId String @db.VarChar(255)
+}
+
+model UserCommentsItem{
+	itemCommentId String @id() @default(uuid()) @db.VarChar(255)
+	itemCommentDescription String @db.VarChar(1000)
+	createdDate DateTime @default(now())
+
+	Item Item @relation(fields: [itemId],references: [itemId],onDelete: Cascade)
+	itemId String @db.VarChar(255)
+
+	User User @relation(fields: [userId],references: [userId],onDelete: Cascade)
+	userId String @db.VarChar(255)
+
+	Replies UserCommentsOnComment[]
+}
+
+model UserCommentsOnComment {
+	itemCommentReplyId String @id() @default(uuid()) @db.VarChar(255)
+	itemCommentReplyDescription String @db.VarChar(1000)
+	createdDate DateTime @default(now())
+
+	User User @relation(fields: [userId],references: [userId],onDelete: Cascade)
+	userId String @db.VarChar(255)
+
+	Comment UserCommentsItem @relation(fields: [itemCommentId],references: [itemCommentId],onDelete: Cascade)
+	itemCommentId String @db.VarChar(255)
+}
+
+
+model UserReportsItem{
+	itemReportId String @id() @default(uuid()) @db.VarChar(255)
+	description String? @db.VarChar(500)
+	purpose String? @db.VarChar(255)
+	reportedDate DateTime @default(now())
+
+	User User @relation(fields: [userId],references: [userId],onDelete: Cascade)
+	userId String @db.VarChar(255)
+
+	Item Item @relation(fields: [itemId],references: [itemId],onDelete: Cascade)
+	itemId String @db.VarChar(255)
+}
+
+
+model UserReportAdmin{
+	userReportId String @id() @default(uuid()) @db.VarChar(255)
+	purpose String? @db.VarChar(255)
+	description String?  @db.VarChar(1000)
+	reportedDate DateTime @default(now())
+
+	From User @relation(fields: [fromUser],references: [userId],onDelete: Cascade)
+	fromUser String @db.VarChar(255)
+}
+
+model Feedback{
+	feedbackId String @id() @default(uuid()) @db.VarChar(255)
+	name String @db.VarChar(255)
+	email String @db.VarChar(255)
+	description String @db.VarChar(1000)
+	postedDate DateTime @default(now())
+}
+
+model Career{
+	careerId String @id() @default(uuid()) @db.VarChar(255)
+	jobTitle String @db.VarChar(255)
+	natureOfJob String @db.VarChar(255)
+	jobLocation String @db.VarChar(255)
+	jobType String @db.VarChar(255)
+	jobDescription String @db.VarChar(2000)
+	jobRequirements String @db.VarChar(2000)
+	jobBenefits String @db.VarChar(2000)
+	createdDate DateTime @default(now())
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

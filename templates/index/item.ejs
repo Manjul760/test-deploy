@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sabaishare - Community Sharing Platform</title>
+    <meta name="description" content="Sabaishare is a community sharing platform where you can share items for free and donate. Join us to contribute to a sharing economy and make a positive impact.">
+    <meta name="keywords" content="share items, donate, community sharing, sharing economy, free giving, donation platform, free items, free stuff, get free items, freebies, free giveaways, free products, free clothes, free furniture, free electronics, free books, free toys, free kitchenware, donate items, donate clothes, donate furniture, donate books, give away items, donate unwanted items, free food, free plants, free pet supplies, free school supplies, free baby items, free home decor, free items near me, free items in nepal, local freebies, free giveaways nepal, free items pickup nepal, community sharing nepal, how to get free items, how to find free items, how to donate items, where to donate items, tips for getting free items, ways to give back to the community, share and swap items, community sharing platform, sustainable living, reduce, reuse, recycle, eco-friendly living, collaborative consumption, giveway items, donate items in nepal">
+  
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<%=itemurl %>">
+    <meta property="og:title" content="<%= itemName%>">
+    <meta property="og:description" content="<%= itemDescription%>">
+    <meta property="og:image" content="<%=itemPicPath %>">
+  
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="<%=itemurl %>">
+    <meta property="twitter:title" content="<%= itemName%>">
+    <meta property="twitter:description" content="<%= itemDescription%>">
+    <meta property="twitter:image" content="<%=itemPicPath %>">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    
+    <!-- Schema.org markup for Google -->
+    <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "Organization",
+      "name": "Sabaishare",
+      "url": "<%=itemurl %>",
+      "description": "<%= itemDescription %>",
+      "logo": "<%= baseurl %>/logo.jpg",
+      "sameAs": [
+        "https://www.facebook.com/yourfacebookpage",
+        "https://twitter.com/yourtwitterpage"
+      ]
+    }
+    </script>
+    <%- include('reactLinks.ejs')  %>
+  </head>
+  
+  <body>
+    <div id="root"></div>
+
+  </body>
+</html>
